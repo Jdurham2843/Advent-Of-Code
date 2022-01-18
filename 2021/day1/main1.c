@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* https://adventofcode.com/2021/day/1 */
+
 int main() {
     FILE* fp;
     const char* filename = "input1.txt";

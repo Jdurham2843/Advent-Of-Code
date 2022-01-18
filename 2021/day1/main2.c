@@ -21,17 +21,15 @@ int main() {
     CircularBuffer* cb;
 
     cb = cb_create(CIRCULAR_BUFFER_CAPACITY);
-
     previousWindow = -1;
     numOfIncreases = 0;
-
+    
     fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("There was a problem opening %s.", filename);
         exit(1);
     }
 
-    printf("hello");
     while(getWindow(fp, cb, &currentWindow)) {
         if (previousWindow != -1 && currentWindow > previousWindow) {
             numOfIncreases++;
@@ -52,7 +50,7 @@ int main() {
     return 0;
 }
 
-BOOL getWindow(FILE* fp, CircularBuffer* cb, int* window) {
+BOOL getWindow(FILE* fp, CircularBuffer* cb, int* windowSum) {
     char line[8];
     int convertedNumber, i = 0;
     BOOL filledAtleastOne = FALSE, shouldContinue = TRUE, initialFill = cb->start == -1;
@@ -67,7 +65,7 @@ BOOL getWindow(FILE* fp, CircularBuffer* cb, int* window) {
     }
 
     if (filledAtleastOne) {
-        *window = cb_sum(cb);
+        *windowSum = cb_sum(cb);
         return TRUE;
     } else {
         return FALSE;
