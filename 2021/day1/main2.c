@@ -1,20 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* https://adventofcode.com/2021/day/1#part2 */
+#include "circular-buffer.h"
 
-/* I need to fix my windowing code. I'm currently just getting 3 lines, then the next 3, etc,
-   instead of windowing. */
+/* https://adventofcode.com/2021/day/1#part2 */
 
 #define FALSE 0
 #define TRUE 1
 
-int getWindow(FILE* fp, char** window);
+#define CIRCULAR_BUFFER_CAPACITY 3
+
+typedef unsigned char BOOL;
+
+BOOL getWindow(FILE* fp, CircularBuffer* cb, int* window);
 
 int main() {
     FILE *fp;
     const char* filename = "input1.txt";
     int previousWindow, currentWindow, numOfIncreases;
+    CircularBuffer* cb;
+
+    cb = cb_create(CIRCULAR_BUFFER_CAPACITY);
 
     previousWindow = -1;
     numOfIncreases = 0;
@@ -25,16 +31,20 @@ int main() {
         exit(1);
     }
 
-    while(getWindow(fp, &currentWindow)) {
+    printf("hello");
+    while(getWindow(fp, cb, &currentWindow)) {
         if (previousWindow != -1 && currentWindow > previousWindow) {
             numOfIncreases++;
         }
+
+        cb_print(cb);
 
         previousWindow = currentWindow;
         currentWindow = 0;
     }
 
     fclose(fp);
+    cb_cleanup(cb);
 
     printf("---------------------------------\n");
     printf("Number of window increases: %d\n", numOfIncreases);
@@ -42,19 +52,22 @@ int main() {
     return 0;
 }
 
-int getWindow(FILE* fp, char** window) {
+BOOL getWindow(FILE* fp, CircularBuffer* cb, int* window) {
     char line[8];
-    int convertedNumber, sum, i = 0;
+    int convertedNumber, i = 0;
+    BOOL filledAtleastOne = FALSE, shouldContinue = TRUE, initialFill = cb->start == -1;
 
-    while (i < 3 && fgets(line, sizeof(line), fp)) {
+    while (shouldContinue && fgets(line, sizeof(line), fp)) {
         convertedNumber = atoi(line);
-        sum += convertedNumber;
+        cb_add(cb, convertedNumber);
 
         i++;
+        filledAtleastOne = TRUE;
+        shouldContinue = initialFill && i < 3;
     }
 
-    if (i == 3) {
-        *window = sum;
+    if (filledAtleastOne) {
+        *window = cb_sum(cb);
         return TRUE;
     } else {
         return FALSE;
